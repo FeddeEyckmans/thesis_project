@@ -1191,16 +1191,76 @@ def find_neighboring_signals(env, start_pos, signals_lookup):
     # Return a completely deduplicated set collection of the discovered signal keys
     return list(set(found_signals))
 
+
 if __name__ == "__main__":
     # --- COMMAND LINE ARGUMENTS ---
     parser = argparse.ArgumentParser(description="RECIFE XML Infrastructure and Timetable Generator Pipeline")
     parser.add_argument("--mode", type=str, choices=["both", "infra", "timetable"], default="both",
                         help="Execution mode: 'both' (generate complete dataset), 'infra' (infrastructure layer only), or 'timetable' (operational layer only)")
-    parser.add_argument("--seed", type=int, default=42,
+    parser.add_argument("--seed", type=int, default=None,  # GEFIXT: default=42 -> None
                         help="Unique pseudo-random seed assigned for this specific batch instance iteration")
+
+    # NEW TERMINAL ARGUMENTS FOR PARAMETER SETS (Nu allemaal correct op None gezet!)
+    parser.add_argument("--grid_size", type=int, default=None,
+                        help="Grid dimension size (creates a grid_size x grid_size square matrix)")
+    parser.add_argument("--stations", type=int, default=None,
+                        help="Total number of scheduled stations")
+    parser.add_argument("--platforms", type=str, default=None,
+                        help="Platform configuration profile as a comma-separated string of integers")
+    parser.add_argument("--courses", type=int, default=None,
+                        help="Traffic volume target: target number of valid train courses to schedule")
+    parser.add_argument("--perturbation", type=float, default=None,
+                        help="Perturbation fraction injected into the active fleet (e.g., 0.1, 0.2, 0.4)")
+
+    # NEW: Terminal flag for visualization
+    parser.add_argument("--visualize", action="store_true",
+                        help="Enable Flatland environmental UI rendering and visualization plot")
     args = parser.parse_args()
 
-    INSTANCE_SEED = args.seed
+    # =========================================================================
+    # EDITABLE HARDCODED CONFIGURATION PARAMETERS (Fallback when no arguments given)
+    # =========================================================================
+    INSTANCE_SEED = 42
+
+    GRID_WIDTH = 55
+    GRID_HEIGHT = 55
+    N_CITIES = 6
+    CONFIGURATION = [5, 3, 3, 2, 2, 2]
+
+    # Target number of valid train courses required to schedule in the final optimization matrix.
+    N_AGENTS_TARGET = 20
+    MAX_ATTEMPTS = 30
+    PERTURBATION_RANGE = (300, 900)
+    PERTURBATION_FRACTION = 0.4
+
+    VISUALIZATION = False
+    # =========================================================================
+
+    # --- Overwrite fallback defaults if terminal arguments ARE provided ---
+    if args.seed is not None:
+        INSTANCE_SEED = args.seed
+    if args.grid_size is not None:
+        GRID_WIDTH = args.grid_size
+        GRID_HEIGHT = args.grid_size
+    if args.stations is not None:
+        N_CITIES = args.stations
+    if args.courses is not None:
+        N_AGENTS_TARGET = args.courses
+    if args.perturbation is not None:
+        PERTURBATION_FRACTION = args.perturbation
+    if args.platforms is not None:
+        try:
+            CONFIGURATION = [int(x) for x in args.platforms.split(",")]
+        except ValueError:
+            print("[ERROR] --platforms format must be a comma-separated list of integers (e.g., 4,2,2,2,2,2)")
+            exit(1)
+
+    # If the terminal flag --visualize is passed, force VISUALIZATION to True
+    if args.visualize:
+        VISUALIZATION = True
+
+    # Dynamic synchronization of structural instance directories to the final resolved SEED
+    SEED = INSTANCE_SEED
     INSTANCE_NAME = f"Instance_{INSTANCE_SEED:03d}"
     INPUT_DIR = os.path.join(INSTANCE_NAME, "inputData")
     OUTPUT_DIR = os.path.join(INSTANCE_NAME, "outputFiles")
@@ -1215,26 +1275,10 @@ if __name__ == "__main__":
 
     print(f"--- 1. Starting Flatland Environment (Mode: {args.mode.upper()}) ---")
     print("\n" + "=" * 75)
-    print(f"{'--- 1. INITIALIZING FLATLAND ENVIRONMENT ---':^75}")
+    print(f"{f'--- 1. INITIALIZING FLATLAND ENVIRONMENT (SEED: {INSTANCE_SEED}) ---':^75}")
     print("=" * 75)
 
-    # --- Configuration Parameters ---
-    # Note: These parameters must strictly match the layout templates configured across the extension models.
-    GRID_WIDTH = 55
-    GRID_HEIGHT = 55
-    N_CITIES = 6
-    SEED = INSTANCE_SEED
-    CONFIGURATION = [6, 3, 3, 2, 2, 2]
-
-    # Target number of valid train courses required to schedule in the final optimization matrix.
-    N_AGENTS_TARGET = 40
-    MAX_ATTEMPTS = 30
-    PERTURBATION_RANGE = (300, 900)
-    PERTURBATION_FRACTION = 0.4
-
-    # Oversampling pool configuration: Instantiate a wide 10x target baseline volume of candidate agents.
-    # This ensures a rich reserve pool remains available to replenish the active fleet as unfeasible paths
-    # and spatial conflicts get iteratively stripped away by the downstream rejection filters.
+    # Oversampling pool configuration
     N_AGENTS_INITIAL = 10 * N_AGENTS_TARGET
 
     # Initialize the custom structural Flatland framework wrapper helper
@@ -1292,7 +1336,6 @@ if __name__ == "__main__":
         print(f"{'--- 2. ENVIRONMENT VISUALIZATION ---':^75}")
         print("=" * 75)
 
-        VISUALIZATION = False
         if VISUALIZATION:
             print("(Dismiss the active image plot window manually to unblock pipeline execution...)")
 

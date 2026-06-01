@@ -3,3 +3,8 @@ __pycache__/
 *.lp
 *.xml
 .vscode/
+
+*.png
+*.csv
+*.xlsx
+*.pkl
