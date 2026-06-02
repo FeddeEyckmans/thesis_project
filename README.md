@@ -34,7 +34,7 @@ Add `--visualize` at the very end if you want to open the graphical Flatland map
 
 ### 2. Generate a 50-Instance Batch (`run_all_instances.py`)
 
-To generate a massive dataset for your thesis tables, use the master bulk tool.
+For large-scale scenario generation and reproducible computational experiments, use the batch generation script. The tool automatically executes the pipeline over a specified range of random seeds.
 
 #### Option A: Run a batch using the script's default settings (Seeds 0 to 49)
 
@@ -69,13 +69,13 @@ python run_all_instances.py --start_seed 0 --end_seed 50 --grid_size 55 --statio
 ### Generation Modes
 
 #### `both`
-Complete lifecycle pipeline generation.
+Complete whole pipeline generation.
 
 #### `infra`
 Infrastructure XML layer only.
 
 #### `timetable`
-Skip pathfinding, load track geometry from cache, and rebuild a fresh timetable instantly.
+Skip pathfinding algorithm, load infrastructure from cache, and rebuild a fresh timetable instantly.
 
 ---
 
@@ -86,10 +86,10 @@ Every successful generation creates a seed-synchronized directory (automatically
 ```text
 Instance_042/
 └── inputData/
-    ├── real_infrastructure.xml  # Microscopic topology maps, signals, and blocks
-    ├── real_TimeTable.xml       # Capacity-checked, conflict-free commercial timetables
-    ├── real_Perturbation.xml    # Stochastic delay profiles for stress-testing
-    └── infra_cache.pkl          # Cached pathfinding edge tensors
+    ├── real_infrastructure.xml  # Infrastructure + Journeys
+    ├── real_TimeTable.xml       # Timetable + rolling stock connections
+    ├── real_Perturbation.xml    # Perturbation scenario
+    └── infra_cache.pkl          # Cached infrastructure data
 ```
 
 ## Reproducibility
