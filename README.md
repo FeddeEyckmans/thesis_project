@@ -18,6 +18,65 @@ thesis_project/
 
 ---
 
+## 🛠️ Installation and Setup
+
+This project was developed and evaluated using **Python 3.12.0**. To avoid dependency conflicts with other Python projects, it is strongly recommended to use a dedicated virtual environment.
+
+### 1. Clone the Repository
+
+Open a terminal, navigate to your desired working directory, and clone the repository:
+
+```bash
+git clone https://github.com/FeddeEyckmans/thesis_project.git
+cd thesis_project
+```
+
+### 2. Create a Virtual Environment
+
+Create a clean virtual environment using Python 3.12:
+
+```bash
+python3.12 -m venv venv
+```
+
+### 3. Activate the Virtual Environment
+
+**Windows**
+
+```bash
+venv\Scripts\activate
+```
+
+**macOS / Linux**
+
+```bash
+source venv/bin/activate
+```
+
+### 4. Install Dependencies
+
+With the virtual environment activated, install all required Python packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Verify the Installation
+
+You can verify that the installation was successful by running:
+
+```bash
+python Main_generator.py --help
+```
+
+or
+
+```bash
+python run_all_instances.py --help
+```
+
+If the help menu is displayed without errors, the installation has been completed successfully.
+
 ## 🚀 Quick Start Guide
 
 You can control all parameters directly from your terminal. If you don't provide any flags, the scripts automatically fall back to the hardcoded variables inside the code.
@@ -99,3 +158,6 @@ The complete sensitivity-analysis experiment matrix is documented in
 
 This file contains all 25 parameter configurations and the exact commands
 required to reproduce the 1,250 railway instances used in the thesis.
+
+
+
